@@ -1,10 +1,10 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
-  OnInit,
   inject,
 } from '@angular/core';
-import { catchError, EMPTY, Observable } from 'rxjs';
+import { catchError, EMPTY } from 'rxjs';
 
 // import { ProductCategory } from '../product-categories/product-category';
 
@@ -20,17 +20,21 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ProductService],
 })
-export class ProductListComponent implements OnInit {
-  pageTitle = 'Product List';
-  errorMessage = '';
+export class ProductListComponent {
   // categories: ProductCategory[] = [];
   private productService = inject(ProductService);
+  pageTitle = 'Product List';
+  errorMessage = '';
 
-  products$!: Observable<Product[]>;
+  products$ = this.productService.products$.pipe(
+    catchError((err) => {
+      this.errorMessage = err;
+      this.cdr.detectChanges();
+      return EMPTY;
+    })
+  );
 
-  ngOnInit(): void {
-    this.products$ = this.productService.getProducts();
-  }
+  constructor(private cdr: ChangeDetectorRef) {}
 
   onAdd(): void {
     console.log('Not yet implemented');

@@ -14,11 +14,10 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-  getProducts(): Observable<Product[]> {
-    return this.http
-      .get<Product[]>(this.productsUrl)
-      .pipe(tap((item) => console.log('data', item))); //
-  }
+  products$ = this.http.get<Product[]>(this.productsUrl).pipe(
+    tap((item) => console.log('data', item)),
+    catchError(this.handleError)
+  );
 
   private fakeProduct(): Product {
     return {
