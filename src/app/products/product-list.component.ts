@@ -2,15 +2,26 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  OnChanges,
+  SimpleChanges,
   inject,
 } from '@angular/core';
-import { catchError, EMPTY } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  combineLatest,
+  EMPTY,
+  filter,
+  map,
+  Subject,
+} from 'rxjs';
 
 // import { ProductCategory } from '../product-categories/product-category';
 
 import { Product } from './product';
 import { ProductService } from './product.service';
 import { CommonModule, CurrencyPipe } from '@angular/common';
+import { ProductCategoryService } from '../product-categories/product-category.service';
 
 @Component({
   standalone: true,
@@ -20,13 +31,17 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ProductService],
 })
-export class ProductListComponent {
+export class ProductListComponent implements OnChanges {
   // categories: ProductCategory[] = [];
   private productService = inject(ProductService);
+  private productCategoryService = inject(ProductCategoryService);
+  private categorySelectedSubject = new BehaviorSubject<number>(0);
+  categorySelectedAction$ = this.categorySelectedSubject.asObservable();
+
   pageTitle = 'Product List';
   errorMessage = '';
-
-  products$ = this.productService.products$.pipe(
+  // selectedCategoryId!: number;
+  categories$ = this.productCategoryService.productCategories$.pipe(
     catchError((err) => {
       this.errorMessage = err;
       this.cdr.detectChanges();
@@ -34,13 +49,32 @@ export class ProductListComponent {
     })
   );
 
+  products$ = combineLatest([
+    this.productService.productsWithCategory$,
+    this.categorySelectedAction$,
+  ]).pipe(
+    map(([products, categoryId]) =>
+      products.filter((product) =>
+        categoryId ? product.categoryId === categoryId : true
+      )
+    ),
+    catchError((err) => {
+      this.errorMessage = err;
+      return EMPTY;
+    })
+  );
+
   constructor(private cdr: ChangeDetectorRef) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log(changes);
+  }
 
   onAdd(): void {
     console.log('Not yet implemented');
   }
 
   onSelected(categoryId: string): void {
-    console.log('Not yet implemented');
+    this.categorySelectedSubject.next(+categoryId);
   }
 }

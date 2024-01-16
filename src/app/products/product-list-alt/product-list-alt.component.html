@@ -1,0 +1,25 @@
+<div class="card">
+  <div class="card-header">
+    {{ pageTitle }}
+  </div>
+
+  @if (products$| async; as products ) {
+  <div class="card-body">
+    <div class="list-group">
+      @for (product of products; track product.id) {
+      <button
+        type="button"
+        class="list-group-item"
+        (click)="onSelected(product.id)"
+      >
+        {{ product.productName }} ({{ product.category }})
+      </button>
+      }
+    </div>
+  </div>
+  }
+</div>
+
+<div class="alert alert-danger" *ngIf="errorMessage$ | async as errorMessage">
+  {{ errorMessage }}
+</div>
