@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { catchError, EMPTY, Observable, Subject } from 'rxjs';
 import { Product } from '../product';
 
@@ -16,10 +16,14 @@ import { Supplier } from '../../suppliers/supplier';
 export class ProductDetailComponent {
   pageTitle = 'Product Detail';
   private errorMessageSubject = new Subject<string>();
+  private productService = inject(ProductService);
   errorMessage$ = this.errorMessageSubject.asObservable();
   productSuppliers: Supplier[] | null = null;
 
-  product$ = new Observable<Product>();
-
-  constructor(private productService: ProductService) {}
+  product$ = this.productService.selectedProduct$.pipe(
+    catchError((err) => {
+      this.errorMessageSubject.next(err);
+      return EMPTY;
+    })
+  );
 }

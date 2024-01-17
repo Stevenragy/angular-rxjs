@@ -50,7 +50,7 @@ export class ProductListComponent implements OnChanges {
   );
 
   products$ = combineLatest([
-    this.productService.productsWithCategory$,
+    this.productService.productsWithAdd$,
     this.categorySelectedAction$,
   ]).pipe(
     map(([products, categoryId]) =>
@@ -72,6 +72,7 @@ export class ProductListComponent implements OnChanges {
 
   onAdd(): void {
     console.log('Not yet implemented');
+    this.productService.addNewProduct();
   }
 
   onSelected(categoryId: string): void {

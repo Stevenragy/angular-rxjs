@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { catchError, EMPTY, Subject } from 'rxjs';
 
@@ -16,6 +16,7 @@ import { CommonModule } from '@angular/common';
 export class ProductListAltComponent {
   pageTitle = 'Products';
   private errorMessageSubject = new Subject<string>();
+  private productService = inject(ProductService);
   errorMessage$ = this.errorMessageSubject.asObservable();
 
   products$ = this.productService.productsWithCategory$.pipe(
@@ -25,11 +26,9 @@ export class ProductListAltComponent {
     })
   );
 
-  // selectedProduct$ = this.productService.selectedProduct$;
-
-  constructor(private productService: ProductService) {}
+  selectedProduct$ = this.productService.selectedProduct$;
 
   onSelected(productId: number): void {
-    // this.productService.selectedProductChanged(productId);
+    this.productService.productSelectedSubject.next(productId);
   }
 }
