@@ -9,6 +9,8 @@ import {
   concatMap,
   tap,
   mergeMap,
+  catchError,
+  shareReplay,
 } from 'rxjs';
 import { Supplier } from './supplier';
 
@@ -18,24 +20,30 @@ import { Supplier } from './supplier';
 export class SupplierService {
   suppliersUrl = 'api/suppliers';
 
-  suppliersWithMap$ = of(1, 5, 8).pipe(
-    map((id) => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
+  suppliers$ = this.http.get<Supplier[]>(this.suppliersUrl).pipe(
+    tap((item) => console.log('Suppliers: ', item)),
+    shareReplay(1),
+    catchError(this.handleError)
   );
 
-  suppliersWithConcatMap$ = of(1, 5, 8).pipe(
-    tap((id) => console.log('concatMap source Observable: ' + id)),
-    concatMap((id) => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
-  );
+  // suppliersWithMap$ = of(1, 5, 8).pipe(
+  //   map((id) => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
+  // );
 
-  supplierWithMergeMap$ = of(1, 5, 8).pipe(
-    tap((id) => console.log('mergeMap source Observable: ' + id)),
-    mergeMap((id) => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
-  );
+  // suppliersWithConcatMap$ = of(1, 5, 8).pipe(
+  //   tap((id) => console.log('concatMap source Observable: ' + id)),
+  //   concatMap((id) => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
+  // );
 
-  supplierWithSwitchMap$ = of(1, 5, 8).pipe(
-    tap((id) => console.log('switchMap source Observable: ' + id)),
-    mergeMap((id) => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
-  );
+  // supplierWithMergeMap$ = of(1, 5, 8).pipe(
+  //   tap((id) => console.log('mergeMap source Observable: ' + id)),
+  //   mergeMap((id) => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
+  // );
+
+  // supplierWithSwitchMap$ = of(1, 5, 8).pipe(
+  //   tap((id) => console.log('switchMap source Observable: ' + id)),
+  //   mergeMap((id) => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
+  // );
 
   constructor(private http: HttpClient) {
     // Commented for refferecess

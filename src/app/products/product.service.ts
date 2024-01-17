@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
 import {
@@ -6,12 +6,16 @@ import {
   catchError,
   combineLatest,
   combineLatestWith,
+  filter,
+  forkJoin,
   map,
   merge,
   Observable,
+  of,
   scan,
   shareReplay,
   Subject,
+  switchMap,
   tap,
   throwError,
 } from 'rxjs';
@@ -19,6 +23,7 @@ import {
 import { Product } from './product';
 import { ProductCategoryService } from '../product-categories/product-category.service';
 import { SupplierService } from '../suppliers/supplier.service';
+import { Supplier } from '../suppliers/supplier';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +31,7 @@ import { SupplierService } from '../suppliers/supplier.service';
 export class ProductService {
   private productsUrl = 'api/products';
   private suppliersUrl = 'api/suppliers';
+  private supplierService = inject(SupplierService);
 
   products$ = this.http.get<Product[]>(this.productsUrl).pipe(
     tap((item) => console.log('Products: ', item)),
@@ -62,6 +68,34 @@ export class ProductService {
     )
   );
 
+  // selectedProductSuppliers$ = combineLatest([
+  //   this.selectedProduct$,
+  //   this.supplierService.suppliers$,
+  // ]).pipe(
+  //   map(([selectedProduct, suppliers]) =>
+  //     suppliers.filter((supplier) =>
+  //       selectedProduct?.supplierIds?.includes(supplier.id)
+  //     )
+  //   )
+  // );
+
+  selectedProductsSuppliers$ = this.selectedProduct$.pipe(
+    filter((product) => Boolean(product)),
+    switchMap((selectedProduct) => {
+      if (selectedProduct?.supplierIds) {
+        return forkJoin(
+          selectedProduct.supplierIds.map((supplierId) =>
+            this.http.get<Supplier>(`${this.suppliersUrl}/${supplierId}`)
+          )
+        );
+      } else {
+        return of([]);
+      }
+    }),
+    tap((suppliers) => console.log('selected product suppliers: ', suppliers)),
+    catchError(this.handleError)
+  );
+
   productInsertedSubject = new Subject<Product>();
   productInsertedAction$ = this.productInsertedSubject.asObservable();
 
@@ -82,8 +116,7 @@ export class ProductService {
 
   constructor(
     private http: HttpClient,
-    private productCategoryService: ProductCategoryService,
-    private supplierService: SupplierService
+    private productCategoryService: ProductCategoryService
   ) {}
 
   private fakeProduct(): Product {
