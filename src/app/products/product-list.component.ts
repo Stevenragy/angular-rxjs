@@ -29,7 +29,6 @@ import { ProductCategoryService } from '../product-categories/product-category.s
   styleUrls: ['./product-list.component.css'],
   imports: [CurrencyPipe, CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ProductService],
 })
 export class ProductListComponent implements OnChanges {
   // categories: ProductCategory[] = [];

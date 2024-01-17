@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { catchError, EMPTY, Subject } from 'rxjs';
 
-import { Product } from '../product';
 import { ProductService } from '../product.service';
 import { CommonModule } from '@angular/common';
 
@@ -12,6 +11,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './product-list-alt.component.html',
+  // providers: [ProductService],
 })
 export class ProductListAltComponent {
   pageTitle = 'Products';
