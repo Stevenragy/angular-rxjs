@@ -18,6 +18,7 @@ import {
 
 import { Product } from './product';
 import { ProductCategoryService } from '../product-categories/product-category.service';
+import { SupplierService } from '../suppliers/supplier.service';
 
 @Injectable({
   providedIn: 'root',
@@ -81,7 +82,8 @@ export class ProductService {
 
   constructor(
     private http: HttpClient,
-    private productCategoryService: ProductCategoryService
+    private productCategoryService: ProductCategoryService,
+    private supplierService: SupplierService
   ) {}
 
   private fakeProduct(): Product {
